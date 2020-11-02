@@ -158,25 +158,32 @@ export class TypeScriptPlugin {
   async generateGraphqlTypes(): Promise<void> {
     this.serverless.cli.log('Generating graphql types...')
 
+    // configurations needed for base typescript plugin
+    const tsPluginConfig = {
+      skipTypename: true,
+      typesPrefix: 'I',
+      enumPrefix: false,
+      declarationKind: 'interface',
+      namingConvention: {
+        typeNames: 'pascal-case#pascalCase',
+        enumValues: 'upper-case#upperCase',
+      },
+    }
+
+    // configurations needed for typescript-resolvers plugin
+    const tsResolversPluginConfig = {
+      useIndexSignature: true, // needed for apollo-gql to work
+      defaultMapper: 'any',
+      noSchemaStitching: true,
+    }
+
     await generate(
       {
         schema: this.graphqlFilePaths,
         generates: {
           [process.cwd() + '/src/generated/graphql.ts']: {
             plugins: ['typescript', 'typescript-resolvers'],
-            config: {
-              skipTypename: true,
-              typesPrefix: 'I',
-              enumPrefix: false,
-              declarationKind: 'interface',
-              useIndexSignature: true, // needed for apollo-gql to work
-              namingConvention: {
-                typeNames: 'pascal-case#pascalCase',
-                enumValues: 'upper-case#upperCase',
-              },
-              defaultMapper: 'any',
-              noSchemaStitching: true,
-            },
+            config: { ...tsPluginConfig, ...tsResolversPluginConfig },
           },
         },
       },
