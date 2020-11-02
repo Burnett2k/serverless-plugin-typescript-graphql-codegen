@@ -78,7 +78,7 @@ export class TypeScriptPlugin {
           this.watchFunction()
           this.serverless.cli.log('Waiting for changes...')
         }
-      }
+      },
     }
   }
 
@@ -88,7 +88,7 @@ export class TypeScriptPlugin {
 
     if (options.function) {
       return {
-        [options.function]: service.functions[this.options.function]
+        [options.function]: service.functions[this.options.function],
       }
     }
 
@@ -96,11 +96,7 @@ export class TypeScriptPlugin {
   }
 
   get rootFileNames() {
-    return typescript.extractFileNames(
-      this.originalServicePath,
-      this.serverless.service.provider.name,
-      this.functions
-    )
+    return typescript.extractFileNames(this.originalServicePath, this.serverless.service.provider.name, this.functions)
   }
 
   prepare() {
@@ -113,14 +109,12 @@ export class TypeScriptPlugin {
       }
 
       // Add plugin to excluded packages or an empty array if exclude is undefined
-      fn.package.exclude = _.uniq([...fn.package.exclude || [], 'node_modules/serverless-plugin-typescript'])
+      fn.package.exclude = _.uniq([...(fn.package.exclude || []), 'node_modules/serverless-plugin-typescript'])
     }
   }
 
   get graphqlFilePaths() {
-    const paths = ['gql', 'graphql'].map(
-      (extension) => `${process.cwd()}/**/*.${extension}`
-    )
+    const paths = ['gql', 'graphql'].map(extension => `${process.cwd()}/**/*.${extension}`)
     return paths
   }
 
@@ -169,17 +163,20 @@ export class TypeScriptPlugin {
         schema: this.graphqlFilePaths,
         generates: {
           [process.cwd() + '/src/generated/graphql.ts']: {
-            plugins: ['typescript'],
+            plugins: ['typescript', 'typescript-resolvers'],
             config: {
               skipTypename: true,
               typesPrefix: 'I',
               enumPrefix: false,
               declarationKind: 'interface',
+              useIndexSignature: true,
               namingConvention: {
                 typeNames: 'pascal-case#pascalCase',
                 enumValues: 'upper-case#upperCase',
-              }
-            }
+              },
+              defaultMapper: 'any',
+              noSchemaStitching: true,
+            },
           },
         },
       },
@@ -248,10 +245,7 @@ export class TypeScriptPlugin {
         fs.unlinkSync(outModulesPath)
       }
 
-      fs.copySync(
-        path.resolve('node_modules'),
-        path.resolve(path.join(BUILD_FOLDER, 'node_modules'))
-      )
+      fs.copySync(path.resolve('node_modules'), path.resolve(path.join(BUILD_FOLDER, 'node_modules')))
     } else {
       if (!fs.existsSync(outModulesPath)) {
         await this.linkOrCopy(path.resolve('node_modules'), outModulesPath, 'junction')
@@ -278,11 +272,7 @@ export class TypeScriptPlugin {
 
     if (this.options.function) {
       const fn = service.functions[this.options.function]
-      fn.package.artifact = path.join(
-        this.originalServicePath,
-        SERVERLESS_FOLDER,
-        path.basename(fn.package.artifact)
-      )
+      fn.package.artifact = path.join(this.originalServicePath, SERVERLESS_FOLDER, path.basename(fn.package.artifact))
       return
     }
 
@@ -318,13 +308,12 @@ export class TypeScriptPlugin {
    * `EPERM` error.
    */
   private async linkOrCopy(srcPath: string, dstPath: string, type?: fs.FsSymlinkType): Promise<void> {
-    return fs.symlink(srcPath, dstPath, type)
-      .catch(error => {
-        if (error.code === 'EPERM' && error.errno === -4048) {
-          return fs.copy(srcPath, dstPath)
-        }
-        throw error
-      })
+    return fs.symlink(srcPath, dstPath, type).catch(error => {
+      if (error.code === 'EPERM' && error.errno === -4048) {
+        return fs.copy(srcPath, dstPath)
+      }
+      throw error
+    })
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "serverless-plugin-typescript-graphql-codegen",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "main": "dist/src/index.js",
   "files": [
@@ -8,6 +8,12 @@
     "package.json",
     "README.md"
   ],
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true,
+    "arrowParens": "avoid",
+    "semi": false
+  },
   "scripts": {
     "prepublish": "npm run build",
     "precommit": "npm run test",
@@ -32,6 +38,7 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^1.17.8",
     "@graphql-codegen/typescript": "^1.17.9",
+    "@graphql-codegen/typescript-resolvers": "^1.17.10",
     "@types/fs-extra": "5.0.5",
     "@types/jest": "24.0.12",
     "@types/lodash": "4.14.123",
