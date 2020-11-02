@@ -169,7 +169,7 @@ export class TypeScriptPlugin {
               typesPrefix: 'I',
               enumPrefix: false,
               declarationKind: 'interface',
-              useIndexSignature: true,
+              useIndexSignature: true, // needed for apollo-gql to work
               namingConvention: {
                 typeNames: 'pascal-case#pascalCase',
                 enumValues: 'upper-case#upperCase',
